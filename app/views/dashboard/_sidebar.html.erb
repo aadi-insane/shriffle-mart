@@ -1,0 +1,123 @@
+<!-- Mobile Dashboard Menu Button (visible only on mobile) -->
+<div class="d-md-none mb-3">
+  <button class="btn btn-primary w-100" type="button" data-bs-toggle="offcanvas" data-bs-target="#dashboardSidebar" aria-controls="dashboardSidebar">
+    <i class="fas fa-bars me-2"></i>Dashboard Menu
+  </button>
+</div>
+
+<!-- Desktop Sidebar (hidden on mobile) -->
+<div class="d-none d-md-block">
+  <!-- Dashboard Sidebar -->
+  <div class="card dashboard-sidebar">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0"><i class="fas fa-user-circle me-2"></i>My Account</h5>
+    </div>
+    <div class="list-group list-group-flush">
+      <%= link_to dashboard_index_path, class: "list-group-item list-group-item-action #{'active' if current_page?(dashboard_index_path)}" do %>
+        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+      <% end %>
+      <%= link_to dashboard_profile_path, class: "list-group-item list-group-item-action #{'active' if current_page?(dashboard_profile_path)}" do %>
+        <i class="fas fa-user me-2"></i> Profile
+      <% end %>
+      <%= link_to dashboard_orders_path, class: "list-group-item list-group-item-action #{'active' if current_page?(dashboard_orders_path)}" do %>
+        <i class="fas fa-shopping-bag me-2"></i> My Orders
+        <% if current_user.orders.count > 0 %>
+          <span class="badge bg-secondary ms-auto"><%= current_user.orders.count %></span>
+        <% end %>
+      <% end %>
+      <%= link_to dashboard_addresses_path, class: "list-group-item list-group-item-action #{'active' if current_page?(dashboard_addresses_path)}" do %>
+        <i class="fas fa-map-marker-alt me-2"></i> Addresses
+        <% if current_user.addresses.count > 0 %>
+          <span class="badge bg-secondary ms-auto"><%= current_user.addresses.count %></span>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card mt-3">
+    <div class="card-header">
+      <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+    </div>
+    <div class="card-body">
+      <%= link_to products_path, class: "btn btn-outline-primary btn-sm w-100 mb-2" do %>
+        <i class="fas fa-shopping-cart me-2"></i>Continue Shopping
+      <% end %>
+      <%= link_to cart_path, class: "btn btn-outline-success btn-sm w-100 mb-2" do %>
+        <i class="fas fa-shopping-bag me-2"></i>View Cart (<%= cart_count %>)
+      <% end %>
+      <% if current_user.orders.any? %>
+        <%= link_to order_path(current_user.orders.last), class: "btn btn-outline-info btn-sm w-100" do %>
+          <i class="fas fa-receipt me-2"></i>Last Order
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="dashboardSidebar" aria-labelledby="dashboardSidebarLabel">
+  <div class="offcanvas-header bg-primary text-white">
+    <h5 class="offcanvas-title" id="dashboardSidebarLabel">
+      <i class="fas fa-user-circle me-2"></i>My Account
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body p-0">
+    <!-- User Info Section -->
+    <div class="bg-light p-3 border-bottom">
+      <div class="d-flex align-items-center">
+        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+          <i class="fas fa-user text-white"></i>
+        </div>
+        <div>
+          <h6 class="mb-0"><%= current_user.name %></h6>
+          <small class="text-muted"><%= current_user.email %></small>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Navigation Links -->
+    <div class="list-group list-group-flush">
+      <%= link_to dashboard_index_path, class: "list-group-item list-group-item-action #{'active' if current_page?(dashboard_index_path)}", data: { bs_dismiss: "offcanvas" } do %>
+        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+      <% end %>
+      <%= link_to dashboard_profile_path, class: "list-group-item list-group-item-action #{'active' if current_page?(dashboard_profile_path)}", data: { bs_dismiss: "offcanvas" } do %>
+        <i class="fas fa-user me-2"></i> Profile
+      <% end %>
+      <%= link_to dashboard_orders_path, class: "list-group-item list-group-item-action #{'active' if current_page?(dashboard_orders_path)}", data: { bs_dismiss: "offcanvas" } do %>
+        <i class="fas fa-shopping-bag me-2"></i> My Orders
+        <% if current_user.orders.count > 0 %>
+          <span class="badge bg-secondary ms-auto"><%= current_user.orders.count %></span>
+        <% end %>
+      <% end %>
+      <%= link_to dashboard_addresses_path, class: "list-group-item list-group-item-action #{'active' if current_page?(dashboard_addresses_path)}", data: { bs_dismiss: "offcanvas" } do %>
+        <i class="fas fa-map-marker-alt me-2"></i> Addresses
+        <% if current_user.addresses.count > 0 %>
+          <span class="badge bg-secondary ms-auto"><%= current_user.addresses.count %></span>
+        <% end %>
+      <% end %>
+    </div>
+    
+    <!-- Quick Actions in Mobile -->
+    <div class="p-3 border-top mt-auto">
+      <h6 class="mb-3"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+      <%= link_to products_path, class: "btn btn-outline-primary btn-sm w-100 mb-2", data: { bs_dismiss: "offcanvas" } do %>
+        <i class="fas fa-shopping-cart me-2"></i>Continue Shopping
+      <% end %>
+      <%= link_to cart_path, class: "btn btn-outline-success btn-sm w-100 mb-2", data: { bs_dismiss: "offcanvas" } do %>
+        <i class="fas fa-shopping-bag me-2"></i>View Cart (<%= cart_count %>)
+      <% end %>
+      <% if current_user.orders.any? %>
+        <%= link_to order_path(current_user.orders.last), class: "btn btn-outline-info btn-sm w-100 mb-2", data: { bs_dismiss: "offcanvas" } do %>
+          <i class="fas fa-receipt me-2"></i>Last Order
+        <% end %>
+      <% end %>
+      
+      <!-- Logout Button -->
+      <%= link_to logout_path, data: { turbo_method: :delete }, class: "btn btn-outline-danger btn-sm w-100 mt-3" do %>
+        <i class="fas fa-sign-out-alt me-2"></i>Logout
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,133 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="fas fa-shopping-cart me-2"></i>Shopping Cart</h1>
+  <% if @cart_items.any? %>
+    <span class="badge bg-primary fs-6"><%= @cart_items.sum { |item| item[:quantity] } %> items</span>
+  <% end %>
+</div>
+
+<% if @cart_items.any? %>
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body">
+          <% @cart_items.each_with_index do |item, index| %>
+            <div class="cart-item cart-item-<%= item[:product].id %> <%= 'border-bottom pb-3 mb-3' unless index == @cart_items.length - 1 %>">
+              <div class="row align-items-center">
+                <div class="col-md-2">
+                  <img src="<%= item[:product].image_url %>" 
+                       alt="<%= item[:product].name %>" 
+                       class="img-fluid rounded"
+                       style="width: 80px; height: 80px; object-fit: cover;">
+                </div>
+                <div class="col-md-4">
+                  <h6 class="mb-1"><%= item[:product].name %></h6>
+                  <small class="text-muted"><%= truncate(item[:product].description, length: 60) %></small>
+                  <div class="mt-1">
+                    <span class="badge bg-light text-dark"><%= item[:product].formatted_price %> each</span>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="quantity-controls">
+                    <button class="btn btn-sm btn-outline-secondary quantity-btn quantity-decrease" 
+                            data-product-id="<%= item[:product].id %>"
+                            data-bs-toggle="tooltip" 
+                            title="Decrease quantity">
+                      <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="mx-3 fw-bold quantity-<%= item[:product].id %>"><%= item[:quantity] %></span>
+                    <button class="btn btn-sm btn-outline-primary quantity-btn quantity-increase" 
+                            data-product-id="<%= item[:product].id %>"
+                            data-bs-toggle="tooltip" 
+                            title="Increase quantity">
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="text-center">
+                    <div class="fw-bold subtotal-<%= item[:product].id %>">$<%= sprintf("%.2f", item[:subtotal]) %></div>
+                    <small class="text-muted">Subtotal</small>
+                  </div>
+                </div>
+                <div class="col-md-1">
+                  <%= link_to remove_from_cart_path(item[:product]), 
+                      data: { 
+                        turbo_method: :delete, 
+                        turbo_confirm: "Remove all #{item[:product].name} from cart?" 
+                      }, 
+                      class: "btn btn-sm btn-outline-danger",
+                      params: { remove_all: true },
+                      title: "Remove from cart" do %>
+                    <i class="fas fa-trash"></i>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal:</span>
+            <span class="cart-total">$<%= sprintf("%.2f", @total) %></span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Shipping:</span>
+            <span class="text-success">Free</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Tax:</span>
+            <span>$0.00</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between mb-3">
+            <strong>Total:</strong>
+            <strong class="cart-total">$<%= sprintf("%.2f", @total) %></strong>
+          </div>
+          
+          <%= link_to new_order_path, class: "btn btn-success btn-lg w-100 mb-3" do %>
+            <i class="fas fa-credit-card me-2"></i>Proceed to Checkout
+          <% end %>
+          
+          <%= link_to products_path, class: "btn btn-outline-primary w-100 mb-2" do %>
+            <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+          <% end %>
+          
+          <%= link_to clear_cart_path, 
+              data: { 
+                turbo_method: :delete, 
+                turbo_confirm: "Are you sure you want to clear your cart?" 
+              }, 
+              class: "btn btn-outline-danger w-100" do %>
+            <i class="fas fa-trash me-2"></i>Clear Cart
+          <% end %>
+        </div>
+      </div>
+      
+      <!-- Shipping Info -->
+      <div class="card mt-3">
+        <div class="card-body text-center">
+          <i class="fas fa-truck text-success mb-2" style="font-size: 2rem;"></i>
+          <h6>Free Shipping</h6>
+          <small class="text-muted">On orders over $50</small>
+        </div>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="text-center py-5">
+    <i class="fas fa-shopping-cart text-muted mb-3" style="font-size: 4rem;"></i>
+    <h3>Your cart is empty</h3>
+    <p class="text-muted mb-4">Looks like you haven't added any items to your cart yet.</p>
+    <%= link_to products_path, class: "btn btn-primary btn-lg" do %>
+      <i class="fas fa-store me-2"></i>Browse Products
+    <% end %>
+  </div>
+<% end %>

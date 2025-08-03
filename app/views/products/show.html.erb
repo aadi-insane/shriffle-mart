@@ -1,0 +1,599 @@
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb" class="mb-4">
+  <ol class="breadcrumb bg-light p-3 rounded">
+    <li class="breadcrumb-item">
+      <%= link_to products_path, class: "text-decoration-none text-primary fw-medium" do %>
+        <i class="fas fa-box me-1"></i>Products
+      <% end %>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+      <span class="text-dark fw-medium"><%= truncate(@product.name, length: 50) %></span>
+    </li>
+  </ol>
+</nav>
+
+<div class="row">
+  <!-- Product Images Section -->
+  <div class="col-lg-6 col-md-6 mb-4">
+    <div class="product-images-container">
+      <!-- Main Product Image -->
+      <div class="main-image-container mb-3 position-relative">
+        <img id="main-product-image" 
+             src="<%= @product.primary_image %>" 
+             class="img-fluid rounded shadow-sm main-product-image" 
+             alt="<%= @product.name %>"
+             data-bs-toggle="modal" 
+             data-bs-target="#imageZoomModal">
+        
+        <!-- Image Badges -->
+        <div class="image-badges position-absolute top-0 start-0 m-3">
+          <% if @product.has_discount? %>
+            <span class="badge bg-danger fs-6 mb-2 d-block">
+              <i class="fas fa-tag me-1"></i><%= @product.discount_percentage.round %>% OFF
+            </span>
+          <% end %>
+          <% if @product.is_featured? %>
+            <span class="badge bg-warning text-dark fs-6 d-block">
+              <i class="fas fa-star me-1"></i>Featured
+            </span>
+          <% end %>
+        </div>
+        
+        <!-- Zoom Icon -->
+        <div class="zoom-icon position-absolute top-0 end-0 m-3">
+          <button class="btn btn-light btn-sm rounded-circle" 
+                  data-bs-toggle="modal" 
+                  data-bs-target="#imageZoomModal"
+                  title="Click to zoom">
+            <i class="fas fa-search-plus"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Thumbnail Images -->
+      <div class="thumbnail-container">
+        <div class="row g-2">
+          <!-- Main Image Thumbnail -->
+          <div class="col-3">
+            <img src="<%= @product.primary_image %>" 
+                 class="img-fluid rounded thumbnail-image active" 
+                 alt="<%= @product.name %> - Main"
+                 data-image="<%= @product.primary_image %>"
+                 data-alt="<%= @product.name %> - Main View">
+          </div>
+          
+          <!-- Additional Thumbnails (using same image for now) -->
+          <div class="col-3">
+            <img src="<%= @product.primary_image %>" 
+                 class="img-fluid rounded thumbnail-image" 
+                 alt="<%= @product.name %> - Side View"
+                 data-image="<%= @product.primary_image %>"
+                 data-alt="<%= @product.name %> - Side View">
+          </div>
+          
+          <div class="col-3">
+            <img src="<%= @product.primary_image %>" 
+                 class="img-fluid rounded thumbnail-image" 
+                 alt="<%= @product.name %> - Back View"
+                 data-image="<%= @product.primary_image %>"
+                 data-alt="<%= @product.primary_image %>"
+                 data-alt="<%= @product.name %> - Back View">
+          </div>
+          
+          <div class="col-3">
+            <img src="<%= @product.primary_image %>" 
+                 class="img-fluid rounded thumbnail-image" 
+                 alt="<%= @product.name %> - Detail View"
+                 data-image="<%= @product.primary_image %>"
+                 data-alt="<%= @product.name %> - Detail View">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Product Information Section -->
+  <div class="col-lg-6 col-md-6">
+    <!-- Product Title and Brand -->
+    <div class="product-header mb-3">
+      <% if @product.brand.present? %>
+        <div class="product-brand mb-2">
+          <span class="badge bg-light text-dark border">
+            <i class="fas fa-certificate me-1"></i><%= @product.brand %>
+          </span>
+        </div>
+      <% end %>
+      
+      <h1 class="product-title h2 mb-2"><%= @product.name %></h1>
+      
+      <!-- Rating and Reviews -->
+      <div class="rating-section mb-3">
+        <% if @product.rating.present? && @product.rating > 0 %>
+          <div class="d-flex align-items-center">
+            <div class="stars me-2">
+              <% (1..5).each do |i| %>
+                <% if i <= @product.rating_stars %>
+                  <i class="fas fa-star text-warning"></i>
+                <% elsif i - 0.5 <= @product.rating_stars %>
+                  <i class="fas fa-star-half-alt text-warning"></i>
+                <% else %>
+                  <i class="far fa-star text-muted"></i>
+                <% end %>
+              <% end %>
+            </div>
+            <span class="rating-text me-2">
+              <strong><%= @product.rating %></strong> out of 5
+            </span>
+            <span class="review-count text-muted">
+              (<%= @product.review_count || 0 %> reviews)
+            </span>
+          </div>
+        <% else %>
+          <div class="text-muted">
+            <i class="far fa-star me-1"></i>No reviews yet
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Price Section -->
+    <div class="price-section mb-4 p-3 bg-light rounded">
+      <div class="d-flex align-items-center flex-wrap">
+        <div class="current-price me-3">
+          <span class="h2 text-danger fw-bold mb-0">
+            $<%= sprintf("%.2f", @product.price) %>
+          </span>
+        </div>
+        
+        <% if @product.has_discount? %>
+          <div class="original-price me-3">
+            <span class="text-muted text-decoration-line-through h5">
+              $<%= sprintf("%.2f", @product.original_price) %>
+            </span>
+          </div>
+          
+          <div class="savings">
+            <span class="badge bg-success fs-6">
+              Save $<%= sprintf("%.2f", @product.savings_amount) %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="price-details mt-2">
+        <small class="text-muted">
+          <i class="fas fa-info-circle me-1"></i>
+          Inclusive of all taxes • Free shipping on orders over $50
+        </small>
+      </div>
+    </div>
+    
+    <!-- Stock Status -->
+    <div class="stock-section mb-4">
+      <% if @product.in_stock? %>
+        <% if @product.low_stock? %>
+          <div class="alert alert-warning py-2">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Hurry!</strong> Only <%= @product.stock_quantity %> left in stock
+          </div>
+        <% else %>
+          <div class="text-success">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>In Stock</strong> - Ready to ship
+          </div>
+        <% end %>
+      <% else %>
+        <div class="alert alert-danger py-2">
+          <i class="fas fa-times-circle me-2"></i>
+          <strong>Out of Stock</strong> - Currently unavailable
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Product Description -->
+    <div class="description-section mb-4">
+      <h5 class="mb-3">
+        <i class="fas fa-info-circle me-2 text-primary"></i>Product Description
+      </h5>
+      <div class="description-content">
+        <p class="text-muted lh-lg"><%= @product.description %></p>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <% if logged_in? %>
+      <div class="action-section mb-4">
+        <div class="d-grid gap-2 d-md-flex">
+          <%= button_to add_to_cart_path(@product), 
+              method: :post, 
+              class: "btn btn-primary btn-lg flex-fill add-to-cart-btn #{'disabled' unless @product.in_stock?}",
+              disabled: !@product.in_stock?,
+              data: { 
+                product_id: @product.id,
+                bs_toggle: "tooltip",
+                bs_placement: "top",
+                bs_title: @product.in_stock? ? "Add #{@product.name} to your cart" : "Product is out of stock"
+              } do %>
+            <i class="fas fa-shopping-cart me-2"></i>
+            <%= @product.in_stock? ? 'Add to Cart' : 'Out of Stock' %>
+          <% end %>
+          
+          <button class="btn btn-outline-danger btn-lg" 
+                  data-bs-toggle="tooltip" 
+                  data-bs-placement="top" 
+                  title="Add to wishlist">
+            <i class="fas fa-heart"></i>
+          </button>
+          
+          <button class="btn btn-outline-secondary btn-lg" 
+                  data-bs-toggle="tooltip" 
+                  data-bs-placement="top" 
+                  title="Share this product">
+            <i class="fas fa-share-alt"></i>
+          </button>
+        </div>
+      </div>
+    <% else %>
+      <div class="alert alert-info mb-4">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-info-circle me-3 fs-4"></i>
+          <div>
+            <strong>Want to purchase?</strong><br>
+            <%= link_to "Sign in", login_path, class: "alert-link fw-bold" %> to add items to your cart
+          </div>
+        </div>
+      </div>
+    <% end %>
+    
+    <!-- Product Features -->
+    <div class="features-section mb-4">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="feature-item d-flex align-items-center">
+            <div class="feature-icon me-3">
+              <i class="fas fa-truck text-success fs-4"></i>
+            </div>
+            <div>
+              <strong>Free Shipping</strong><br>
+              <small class="text-muted">On orders over $50</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="feature-item d-flex align-items-center">
+            <div class="feature-icon me-3">
+              <i class="fas fa-undo text-primary fs-4"></i>
+            </div>
+            <div>
+              <strong>Easy Returns</strong><br>
+              <small class="text-muted">30-day return policy</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="feature-item d-flex align-items-center">
+            <div class="feature-icon me-3">
+              <i class="fas fa-shield-alt text-warning fs-4"></i>
+            </div>
+            <div>
+              <strong>Warranty</strong><br>
+              <small class="text-muted">1-year manufacturer warranty</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="feature-item d-flex align-items-center">
+            <div class="feature-icon me-3">
+              <i class="fas fa-headset text-info fs-4"></i>
+            </div>
+            <div>
+              <strong>24/7 Support</strong><br>
+              <small class="text-muted">Customer service available</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Product Details -->
+    <div class="details-section">
+      <h5 class="mb-3">
+        <i class="fas fa-list me-2 text-primary"></i>Product Details
+      </h5>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <tbody>
+            <% if @product.sku.present? %>
+              <tr>
+                <td class="fw-bold text-muted">SKU:</td>
+                <td><%= @product.sku %></td>
+              </tr>
+            <% end %>
+            <% if @product.category.present? %>
+              <tr>
+                <td class="fw-bold text-muted">Category:</td>
+                <td><%= @product.category.titleize %></td>
+              </tr>
+            <% end %>
+            <% if @product.brand.present? %>
+              <tr>
+                <td class="fw-bold text-muted">Brand:</td>
+                <td><%= @product.brand %></td>
+              </tr>
+            <% end %>
+            <% if @product.tags.present? %>
+              <tr>
+                <td class="fw-bold text-muted">Tags:</td>
+                <td>
+                  <% @product.tags_array.each do |tag| %>
+                    <span class="badge bg-light text-dark me-1"><%= tag %></span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation Buttons -->
+<div class="row mt-5">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center">
+      <%= link_to products_path, class: "btn btn-outline-secondary btn-lg" do %>
+        <i class="fas fa-arrow-left me-2"></i>Back to Products
+      <% end %>
+      
+      <div class="social-share">
+        <span class="text-muted me-3">Share this product:</span>
+        <button class="btn btn-outline-primary btn-sm me-2" title="Share on Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </button>
+        <button class="btn btn-outline-info btn-sm me-2" title="Share on Twitter">
+          <i class="fab fa-twitter"></i>
+        </button>
+        <button class="btn btn-outline-success btn-sm" title="Share on WhatsApp">
+          <i class="fab fa-whatsapp"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Image Zoom Modal -->
+<div class="modal fade" id="imageZoomModal" tabindex="-1" aria-labelledby="imageZoomModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imageZoomModalLabel"><%= @product.name %></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="zoom-image" 
+             src="<%= @product.primary_image %>" 
+             class="img-fluid rounded" 
+             alt="<%= @product.name %>">
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Product Detail Page Styles */
+.main-product-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  cursor: zoom-in;
+  transition: transform 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.main-product-image:hover {
+  transform: scale(1.02);
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  opacity: 0.7;
+}
+
+.thumbnail-image:hover {
+  opacity: 1;
+  border-color: #007bff;
+  transform: scale(1.05);
+}
+
+.thumbnail-image.active {
+  opacity: 1;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.image-badges .badge {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.zoom-icon button {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.product-title {
+  color: #2c3e50;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.stars i {
+  font-size: 1rem;
+  margin-right: 2px;
+}
+
+.price-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 1px solid #e9ecef;
+}
+
+.current-price {
+  font-size: 2rem;
+}
+
+.feature-item {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  background: #ffffff;
+  border-color: #007bff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+.add-to-cart-btn {
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.add-to-cart-btn:hover:not(.disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.breadcrumb {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 1px solid #e9ecef;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  font-weight: bold;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.breadcrumb-item a {
+  transition: all 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+  color: #0056b3 !important;
+  text-decoration: underline !important;
+}
+
+.table td {
+  border: none;
+  padding: 0.5rem 0;
+}
+
+.table tr:not(:last-child) td {
+  border-bottom: 1px solid #f8f9fa;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .main-product-image {
+    height: 300px;
+  }
+  
+  .thumbnail-image {
+    height: 60px;
+  }
+  
+  .current-price {
+    font-size: 1.5rem;
+  }
+  
+  .feature-item {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .d-md-flex .btn {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Animation for product images */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.main-product-image {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Zoom modal enhancements */
+.modal-body img {
+  max-height: 70vh;
+  width: auto;
+}
+
+/* Social share buttons */
+.social-share .btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+
+<script>
+// Product Detail Page JavaScript
+$(document).ready(function() {
+  // Thumbnail image switching
+  $('.thumbnail-image').on('click', function() {
+    const newImageSrc = $(this).data('image');
+    const newImageAlt = $(this).data('alt');
+    
+    // Update main image
+    $('#main-product-image').attr('src', newImageSrc).attr('alt', newImageAlt);
+    
+    // Update zoom modal image
+    $('#zoom-image').attr('src', newImageSrc).attr('alt', newImageAlt);
+    
+    // Update active thumbnail
+    $('.thumbnail-image').removeClass('active');
+    $(this).addClass('active');
+    
+    // Add fade effect
+    $('#main-product-image').css('opacity', '0').animate({opacity: 1}, 300);
+  });
+  
+  // Initialize tooltips
+  if (typeof bootstrap !== 'undefined') {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  }
+  
+  // Social share functionality (placeholder)
+  $('.social-share .btn').on('click', function() {
+    const platform = $(this).attr('title');
+    alert('Share on ' + platform + ' - Feature coming soon!');
+  });
+});
+</script>

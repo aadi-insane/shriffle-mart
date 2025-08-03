@@ -1,0 +1,81 @@
+<div class="row">
+  <div class="col-md-3">
+    <%= render 'sidebar' %>
+  </div>
+  
+  <div class="col-md-9">
+    <h1>Welcome back, <%= current_user.name %>!</h1>
+    <p class="text-muted">Here's an overview of your account</p>
+    
+    <!-- Account Stats -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h3 class="text-primary"><%= @total_orders %></h3>
+            <p class="card-text">Total Orders</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h3 class="text-success"><%= @addresses_count %></h3>
+            <p class="card-text">Saved Addresses</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h3 class="text-info">0</h3>
+            <p class="card-text">Cart Items</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Recent Orders -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Recent Orders</h5>
+        <%= link_to "View All", dashboard_orders_path, class: "btn btn-sm btn-outline-primary" %>
+      </div>
+      <div class="card-body">
+        <% if @recent_orders.any? %>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Date</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @recent_orders.each do |order| %>
+                  <tr>
+                    <td>#<%= order.id %></td>
+                    <td><%= order.created_at.strftime("%b %d, %Y") %></td>
+                    <td>$<%= sprintf("%.2f", order.total) %></td>
+                    <td><span class="badge bg-success">Completed</span></td>
+                    <td>
+                      <%= link_to "View", order_path(order), class: "btn btn-sm btn-outline-primary" %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center py-4">
+            <p class="text-muted">No orders yet</p>
+            <%= link_to "Start Shopping", products_path, class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

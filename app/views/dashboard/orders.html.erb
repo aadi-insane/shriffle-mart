@@ -1,0 +1,208 @@
+<div class="row">
+  <div class="col-md-3">
+    <%= render 'sidebar' %>
+  </div>
+  
+  <div class="col-md-9">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1><i class="fas fa-shopping-bag me-2 text-primary"></i>My Orders</h1>
+        <p class="text-muted mb-0">Track and manage your order history</p>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-primary fs-6"><%= @orders.count %> total orders</span>
+      </div>
+    </div>
+
+    <% if @orders.any? %>
+      <!-- Order Statistics -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card text-center border-0 bg-light">
+            <div class="card-body">
+              <i class="fas fa-shopping-cart text-primary mb-2" style="font-size: 2rem;"></i>
+              <h4 class="text-primary mb-0"><%= @orders.count %></h4>
+              <small class="text-muted">Total Orders</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-center border-0 bg-light">
+            <div class="card-body">
+              <i class="fas fa-dollar-sign text-success mb-2" style="font-size: 2rem;"></i>
+              <h4 class="text-success mb-0">$<%= sprintf("%.2f", @orders.sum(:total)) %></h4>
+              <small class="text-muted">Total Spent</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-center border-0 bg-light">
+            <div class="card-body">
+              <i class="fas fa-calendar text-info mb-2" style="font-size: 2rem;"></i>
+              <h4 class="text-info mb-0"><%= @orders.where('created_at > ?', 30.days.ago).count %></h4>
+              <small class="text-muted">Last 30 Days</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders List -->
+      <% @orders.each_with_index do |order, index| %>
+        <div class="card mb-3 order-card">
+          <div class="card-header bg-white">
+            <div class="row align-items-center">
+              <div class="col-md-6">
+                <h6 class="mb-0">
+                  <i class="fas fa-receipt me-2 text-primary"></i>
+                  Order #<%= order.id %>
+                </h6>
+                <small class="text-muted">
+                  <i class="fas fa-calendar me-1"></i>
+                  Placed on <%= order.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+                </small>
+              </div>
+              <div class="col-md-3 text-center">
+                <span class="badge bg-success fs-6">
+                  <i class="fas fa-check-circle me-1"></i>Completed
+                </span>
+              </div>
+              <div class="col-md-3 text-end">
+                <h5 class="mb-0 text-primary">$<%= sprintf("%.2f", order.total) %></h5>
+                <small class="text-muted"><%= pluralize(order.order_items.sum(:quantity), 'item') %></small>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card-body">
+            <!-- Order Items -->
+            <div class="row">
+              <div class="col-md-8">
+                <h6 class="text-muted mb-3">
+                  <i class="fas fa-box me-2"></i>Items Ordered
+                </h6>
+                <div class="row">
+                  <% order.order_items.limit(3).each do |item| %>
+                    <div class="col-md-4 mb-2">
+                      <div class="d-flex align-items-center">
+                        <img src="<%= item.product.image_url %>" 
+                             alt="<%= item.product.name %>" 
+                             class="rounded me-2"
+                             style="width: 40px; height: 40px; object-fit: cover;">
+                        <div>
+                          <small class="fw-bold d-block"><%= truncate(item.product.name, length: 20) %></small>
+                          <small class="text-muted">Qty: <%= item.quantity %></small>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                  <% if order.order_items.count > 3 %>
+                    <div class="col-md-4 mb-2">
+                      <div class="text-center">
+                        <small class="text-muted">
+                          +<%= order.order_items.count - 3 %> more items
+                        </small>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <h6 class="text-muted mb-3">
+                  <i class="fas fa-truck me-2"></i>Delivery Information
+                </h6>
+                <div class="bg-light p-3 rounded">
+                  <small class="text-muted d-block mb-1">Delivered to:</small>
+                  <small class="fw-bold d-block mb-2"><%= order.name %></small>
+                  <small class="text-muted">
+                    <%= simple_format(order.address, {}, wrapper_tag: "span") %>
+                  </small>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Order Actions -->
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+              <div class="d-flex gap-2">
+                <%= link_to order_path(order), class: "btn btn-outline-primary btn-sm" do %>
+                  <i class="fas fa-eye me-1"></i>View Details
+                <% end %>
+                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" title="Download Invoice">
+                  <i class="fas fa-download me-1"></i>Invoice
+                </button>
+                <button class="btn btn-outline-info btn-sm" data-bs-toggle="tooltip" title="Track Order">
+                  <i class="fas fa-map-marker-alt me-1"></i>Track
+                </button>
+              </div>
+              
+              <div class="text-muted">
+                <small>
+                  <i class="fas fa-clock me-1"></i>
+                  Estimated delivery: <%= (order.created_at + 5.days).strftime("%B %d, %Y") %>
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Pagination placeholder -->
+      <% if @orders.count > 10 %>
+        <div class="d-flex justify-content-center mt-4">
+          <nav aria-label="Orders pagination">
+            <ul class="pagination">
+              <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+              </li>
+              <li class="page-item active">
+                <span class="page-link">1</span>
+              </li>
+              <li class="page-item disabled">
+                <span class="page-link">Next</span>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      <% end %>
+
+    <% else %>
+      <!-- Empty State -->
+      <div class="text-center py-5">
+        <div class="mb-4">
+          <i class="fas fa-shopping-bag text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
+        </div>
+        <h3 class="text-muted mb-3">No Orders Yet</h3>
+        <p class="text-muted mb-4">
+          You haven't placed any orders yet. Start shopping to see your order history here.
+        </p>
+        <%= link_to products_path, class: "btn btn-primary btn-lg" do %>
+          <i class="fas fa-store me-2"></i>Start Shopping
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+.order-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.order-card .card-header {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.order-card img {
+  transition: transform 0.2s ease;
+}
+
+.order-card img:hover {
+  transform: scale(1.1);
+}
+</style>
